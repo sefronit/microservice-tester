@@ -1,8 +1,8 @@
-import requests as req
-import json as js
 from typing import List, Optional
 from dataclasses import dataclass
 from marshmallow import Schema, fields, post_load
+from datetime import datetime
+
 
 @dataclass
 class AddressDTO:
@@ -459,3 +459,496 @@ class CooltraAuthResponseDTOSchema(Schema):
     @post_load
     def create(self, data, **kwargs):
         return CooltraAuthResponseDTO(**data)
+
+
+@dataclass
+class CooltraMotoRentalVehicleDTO:
+    id: int
+    system_id: Optional[str]
+    license_plate: str
+    position: List[float]
+    range: int
+    battery_percentage: int
+    model_id: int
+
+
+@dataclass
+class CooltraActiveReservationDTO:
+    id: str
+    system_id: str
+    created_at: datetime
+    expires_at: datetime
+    expires_in: int
+    vehicle: CooltraMotoRentalVehicleDTO
+
+
+@dataclass
+class CooltraCheckInInfoDTO:
+    id: str
+    system_id: str
+    reservation_id: str
+    started_at: datetime
+    duration: int
+    state: str
+    vehicle: CooltraMotoRentalVehicleDTO
+
+
+@dataclass
+class CooltraCheckInRequestDTO:
+    qr_code_id: Optional[str]
+    vehicle_id: Optional[str]
+    provider_id: str
+
+
+@dataclass
+class CooltraCheckoutPolicyDto:
+    dismissible_errors: List[str]
+
+
+@dataclass
+class CooltraCheckoutRequestDTO:
+    user_id: str
+    dismissible: List[str]
+    provider_id: str
+
+
+@dataclass
+class CooltraConfigurationResponseDTO:
+    systems: List['CooltraSystemDto']
+    vehicle_models: List['CooltraVehicleModelDto']
+
+
+@dataclass
+class CooltraCurrentActivityResponseDTO:
+    reservation: CooltraActiveReservationDTO
+    rental: 'CooltraRentalInfoDTO'
+
+
+@dataclass
+class CooltraGeofenceDto:
+    type: str
+    coordinates: List[List[List[List[float]]]]
+
+
+@dataclass
+class CooltraMotoCoordinates:
+    latitude: float
+    longitude: float
+
+
+@dataclass
+class CooltraMotoRentalProviderDTO:
+    provider_id: str
+
+
+@dataclass
+class CooltraPriceInfo:
+    amount: float
+    currency: str
+
+
+@dataclass
+class CooltraRentalInfoDTO:
+    id: str
+    reservation_id: Optional[str]
+    duration: int
+    billable_duration: int
+    prices_include_tax: bool
+    price: CooltraPriceInfo
+    tax: CooltraPriceInfo
+    vehicle: Optional[CooltraMotoRentalVehicleDTO]
+    start_point: Optional[CooltraMotoCoordinates]
+    end_point: Optional[CooltraMotoCoordinates]
+    distance: Optional[int]
+    tax_rate: float
+
+
+@dataclass
+class CooltraRentalDTO:
+    rental: CooltraRentalInfoDTO
+
+
+@dataclass
+class CooltraReservationCancellationRequestDTO:
+    provider_id: str
+
+
+@dataclass
+class CooltraReservationCancellationResultDTO:
+    status: int
+    body: str
+
+
+@dataclass
+class CooltraReservationInfoDTO:
+    id: str
+    system_id: str
+    created_at: datetime
+    expires_at: datetime
+    expires_in: int
+    vehicle: CooltraMotoRentalVehicleDTO
+
+
+@dataclass
+class CooltraReservationRequestDTO:
+    vehicle_id: str
+    provider_id: str
+
+
+@dataclass
+class CooltraReservationResultDTO:
+    status: int
+    body: 'IResponseResult'  # Placeholder for IResponseResult
+
+
+@dataclass
+class CooltraSystemDto:
+    id: str
+    geofence: CooltraGeofenceDto
+
+
+@dataclass
+class CooltraUserRegistrationRequestDTO:
+    external_user_id: str
+    first_name: str
+    middle_name: str
+    last_name: str
+    gender: str
+    phone: str
+    email: str
+    language: str
+    birthdate: Optional[datetime]
+    address_street: str
+    address_city: str
+    address_zip: str
+    address_state: str
+    address_country_code: str
+    provider_code: str
+
+
+@dataclass
+class CooltraUserRegistrationResponseDTO:
+    external_id: str
+    first_name: str
+    middle_name: str
+    last_name: str
+    gender: str
+    phone: str
+    language: str
+    birthdate: datetime
+    address_street: str
+    address_city: str
+    address_zip: str
+    address_state: str
+    address_country_code: str
+    home_system_id: str
+    user_condition: Optional[str]
+    email: str
+    state: str
+
+
+@dataclass
+class CooltraVehicleActionRequestDTO:
+    user_id: str
+    action: str
+    provider_id: str
+
+
+@dataclass
+class CooltraVehicleActionResultDTO:
+    status: int
+    body: str
+
+
+@dataclass
+class CooltraVehicleModelDto:
+    id: int
+    actions: List[str]
+    checkout_policy: CooltraCheckoutPolicyDto
+
+
+from marshmallow import Schema, fields, post_load
+from marshmallow_dataclass import class_schema
+
+
+class CooltraMotoRentalVehicleDTOSchema(Schema):
+    id = fields.Int(required=True)
+    system_id = fields.Str(allow_none=True)
+    license_plate = fields.Str(required=True)
+    position = fields.List(fields.Float(), required=True)
+    range = fields.Int(required=True)
+    battery_percentage = fields.Int(required=True)
+    model_id = fields.Int(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraMotoRentalVehicleDTO(**data)
+
+
+class CooltraActiveReservationDTOSchema(Schema):
+    id = fields.Str(required=True)
+    system_id = fields.Str(required=True)
+    created_at = fields.DateTime(required=True)
+    expires_at = fields.DateTime(required=True)
+    expires_in = fields.Int(required=True)
+    vehicle = fields.Nested(CooltraMotoRentalVehicleDTOSchema, required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraActiveReservationDTO(**data)
+
+
+class CooltraCheckInInfoDTOSchema(Schema):
+    id = fields.Str(required=True)
+    system_id = fields.Str(required=True)
+    reservation_id = fields.Str(required=True)
+    started_at = fields.DateTime(required=True)
+    duration = fields.Int(required=True)
+    state = fields.Str(required=True)
+    vehicle = fields.Nested(CooltraMotoRentalVehicleDTOSchema, required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraCheckInInfoDTO(**data)
+
+
+class CooltraCheckInRequestDTOSchema(Schema):
+    qr_code_id = fields.Str(allow_none=True)
+    vehicle_id = fields.Str(allow_none=True)
+    provider_id = fields.UUID(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraCheckInRequestDTO(**data)
+
+
+class CooltraCheckoutPolicyDtoSchema(Schema):
+    dismissible_errors = fields.List(fields.Str(), required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraCheckoutPolicyDto(**data)
+
+
+class CooltraCheckoutRequestDTOSchema(Schema):
+    user_id = fields.Str(required=True)
+    dismissible = fields.List(fields.Str(), required=True)
+    provider_id = fields.UUID(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraCheckoutRequestDTO(**data)
+
+
+class CooltraConfigurationResponseDTOSchema(Schema):
+    systems = fields.List(fields.Nested(lambda: CooltraSystemDtoSchema()), required=True)
+    vehicle_models = fields.List(fields.Nested(lambda: CooltraVehicleModelDtoSchema()), required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraConfigurationResponseDTO(**data)
+
+
+class CooltraCurrentActivityResponseDTOSchema(Schema):
+    reservation = fields.Nested(CooltraActiveReservationDTOSchema, required=True)
+    rental = fields.Nested(lambda: CooltraRentalInfoDTOSchema(), required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraCurrentActivityResponseDTO(**data)
+
+
+class CooltraGeofenceDtoSchema(Schema):
+    type = fields.Str(required=True)
+    coordinates = fields.List(
+        fields.List(fields.List(fields.List(fields.Float(), required=True), required=True), required=True),
+        required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraGeofenceDto(**data)
+
+
+class CooltraMotoCoordinatesSchema(Schema):
+    latitude = fields.Float(required=True)
+    longitude = fields.Float(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraMotoCoordinates(**data)
+
+
+class CooltraMotoRentalProviderDTOSchema(Schema):
+    provider_id = fields.UUID(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraMotoRentalProviderDTO(**data)
+
+
+class CooltraPriceInfoSchema(Schema):
+    amount = fields.Float(required=True)
+    currency = fields.Str(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraPriceInfo(**data)
+
+
+class CooltraRentalInfoDTOSchema(Schema):
+    id = fields.Str(required=True)
+    reservation_id = fields.Str(allow_none=True)
+    duration = fields.Int(required=True)
+    billable_duration = fields.Int(required=True)
+    prices_include_tax = fields.Bool(required=True)
+    price = fields.Nested(CooltraPriceInfoSchema, required=True)
+    tax = fields.Nested(CooltraPriceInfoSchema, required=True)
+    vehicle = fields.Nested(CooltraMotoRentalVehicleDTOSchema, allow_none=True)
+    start_point = fields.Nested(CooltraMotoCoordinatesSchema, allow_none=True)
+    end_point = fields.Nested(CooltraMotoCoordinatesSchema, allow_none=True)
+    distance = fields.Int(allow_none=True)
+    tax_rate = fields.Float(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraRentalInfoDTO(**data)
+
+
+class CooltraRentalDTOSchema(Schema):
+    rental = fields.Nested(CooltraRentalInfoDTOSchema, required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraRentalDTO(**data)
+
+
+class CooltraReservationCancellationRequestDTOSchema(Schema):
+    provider_id = fields.UUID(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraReservationCancellationRequestDTO(**data)
+
+
+class CooltraReservationCancellationResultDTOSchema(Schema):
+    status = fields.Int(required=True)
+    body = fields.Str(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraReservationCancellationResultDTO(**data)
+
+
+class CooltraReservationInfoDTOSchema(Schema):
+    id = fields.Str(required=True)
+    system_id = fields.Str(required=True)
+    created_at = fields.DateTime(required=True)
+    expires_at = fields.DateTime(required=True)
+    expires_in = fields.Int(required=True)
+    vehicle = fields.Nested(CooltraMotoRentalVehicleDTOSchema, required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraReservationInfoDTO(**data)
+
+
+class CooltraReservationRequestDTOSchema(Schema):
+    vehicle_id = fields.Str(required=True)
+    provider_id = fields.UUID(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraReservationRequestDTO(**data)
+
+
+class CooltraReservationResultDTOSchema(Schema):
+    status = fields.Int(required=True)
+    body = fields.Raw(required=True)  # Generic field to handle any type
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraReservationResultDTO(**data)
+
+
+class CooltraSystemDtoSchema(Schema):
+    id = fields.Str(required=True)
+    geofence = fields.Nested(CooltraGeofenceDtoSchema, required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraSystemDto(**data)
+
+
+class CooltraUserRegistrationRequestDTOSchema(Schema):
+    external_user_id = fields.Str(required=True)
+    first_name = fields.Str(required=True)
+    middle_name = fields.Str(required=True)
+    last_name = fields.Str(required=True)
+    gender = fields.Str(required=True)
+    phone = fields.Str(required=True)
+    email = fields.Str(required=True)
+    language = fields.Str(required=True)
+    birthdate = fields.DateTime(allow_none=True)
+    address_street = fields.Str(required=True)
+    address_city = fields.Str(required=True)
+    address_zip = fields.Str(required=True)
+    address_state = fields.Str(required=True)
+    address_country_code = fields.Str(required=True)
+    provider_code = fields.Str(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraUserRegistrationRequestDTO(**data)
+
+
+class CooltraUserRegistrationResponseDTOSchema(Schema):
+    external_id = fields.Str(required=True)
+    first_name = fields.Str(required=True)
+    middle_name = fields.Str(required=True)
+    last_name = fields.Str(required=True)
+    gender = fields.Str(required=True)
+    phone = fields.Str(required=True)
+    language = fields.Str(required=True)
+    birthdate = fields.DateTime(required=True)
+    address_street = fields.Str(required=True)
+    address_city = fields.Str(required=True)
+    address_zip = fields.Str(required=True)
+    address_state = fields.Str(required=True)
+    address_country_code = fields.Str(required=True)
+    home_system_id = fields.Str(required=True)
+    user_condition = fields.Str(allow_none=True)
+    email = fields.Str(required=True)
+    state = fields.Str(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraUserRegistrationResponseDTO(**data)
+
+
+class CooltraVehicleActionRequestDTOSchema(Schema):
+    user_id = fields.Str(required=True)
+    action = fields.Str(required=True)
+    provider_id = fields.UUID(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraVehicleActionRequestDTO(**data)
+
+
+class CooltraVehicleActionResultDTOSchema(Schema):
+    status = fields.Int(required=True)
+    body = fields.Str(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraVehicleActionResultDTO(**data)
+
+
+class CooltraVehicleModelDtoSchema(Schema):
+    id = fields.Int(required=True)
+    actions = fields.List(fields.Str(), required=True)
+    checkout_policy = fields.Nested(CooltraCheckoutPolicyDtoSchema, required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return CooltraVehicleModelDto(**data)
