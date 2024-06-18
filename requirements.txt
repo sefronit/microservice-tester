@@ -1,1 +1,4 @@
 jsonpickle
+requests
+marshmallow~=3.21.2
+marshmallow_dataclass
