@@ -191,6 +191,7 @@ class CooltraMotoRentalVehicleDTO:
 @dataclass
 class CooltraActiveReservationDTO:
     id: str
+    provider_id: str
     system_id: str
     created_at: datetime
     expires_at: datetime
@@ -202,7 +203,6 @@ class CooltraActiveReservationDTO:
 class CooltraCheckInInfoDTO:
     id: str
     system_id: str
-    reservation_id: str
     started_at: datetime
     duration: int
     state: str
@@ -214,6 +214,7 @@ class CooltraCheckInRequestDTO:
     qr_code_id: Optional[str] = None
     vehicle_id: Optional[str] = None
     provider_code: str = None
+
 
 
 @dataclass
