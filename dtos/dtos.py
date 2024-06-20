@@ -224,9 +224,8 @@ class CooltraCheckoutPolicyDto:
 
 @dataclass
 class CooltraCheckoutRequestDTO:
-    user_id: str
-    dismissible: List[str]
-    provider_id: str
+    dismiss: Optional[List[str]]
+    provider_code: str
 
 
 @dataclass
@@ -287,7 +286,7 @@ class CooltraRentalDTO:
 
 @dataclass
 class CooltraReservationCancellationRequestDTO:
-    provider_id: str
+    provider_code: str
 
 
 @dataclass
@@ -744,9 +743,8 @@ class CooltraCheckoutPolicyDtoSchema(Schema):
 
 
 class CooltraCheckoutRequestDTOSchema(Schema):
-    user_id = fields.Str(required=True)
-    dismissible = fields.List(fields.Str(), required=True)
-    provider_id = fields.UUID(required=True)
+    dismiss = fields.List(fields.Str(), required=True, allow_none=True)
+    provider_code = fields.Str(required=True, allow_none=True)
 
     @post_load
     def make_instance(self, data, **kwargs):
@@ -763,8 +761,8 @@ class CooltraConfigurationResponseDTOSchema(Schema):
 
 
 class CooltraCurrentActivityResponseDTOSchema(Schema):
-    reservation = fields.Nested(CooltraActiveReservationDTOSchema, required=True)
-    rental = fields.Nested(lambda: CooltraRentalInfoDTOSchema(), required=True)
+    reservation = fields.Nested(CooltraActiveReservationDTOSchema, required=True, allow_none=True)
+    rental = fields.Nested(lambda: CooltraRentalInfoDTOSchema(), required=True, allow_none=True)
 
     @post_load
     def make_instance(self, data, **kwargs):
@@ -814,8 +812,8 @@ class CooltraRentalInfoDTOSchema(Schema):
     duration = fields.Int(required=True)
     billable_duration = fields.Int(required=True)
     prices_include_tax = fields.Bool(required=True)
-    price = fields.Nested(CooltraPriceInfoSchema, required=True)
-    tax = fields.Nested(CooltraPriceInfoSchema, required=True)
+    price = fields.Nested(CooltraPriceInfoSchema, required=True, allow_none=True)
+    tax = fields.Nested(CooltraPriceInfoSchema, required=True ,allow_none=True)
     vehicle = fields.Nested(CooltraMotoRentalVehicleDTOSchema, allow_none=True)
     start_point = fields.Nested(CooltraMotoCoordinatesSchema, allow_none=True)
     end_point = fields.Nested(CooltraMotoCoordinatesSchema, allow_none=True)
@@ -836,7 +834,7 @@ class CooltraRentalDTOSchema(Schema):
 
 
 class CooltraReservationCancellationRequestDTOSchema(Schema):
-    provider_id = fields.UUID(required=True)
+    provider_code = fields.UUID(required=True)
 
     @post_load
     def make_instance(self, data, **kwargs):
