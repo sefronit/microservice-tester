@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import List, Optional
+
 from marshmallow import Schema, fields, post_load
 
 
@@ -200,3 +202,90 @@ class TwoWheelsAllProvidersDTOSchema(Schema):
     @post_load
     def make_instance(self, data, **kwargs):
         return TwoWheelsAllProvidersDTO(**data)
+
+
+@dataclass
+class TwoWheelsVehicleSearchFilters:
+    north_east_lat: float = None
+    north_east_lon: float = None
+    south_west_lat: float = None
+    south_west_lon: float = None
+    vehicle_types: List[str] = None
+    provider_codes: List[str] = None
+    battery_level_ranges: List[str] = None
+    system_id: str = None
+
+
+class TwoWheelsVehicleSearchFiltersSchema(Schema):
+    north_east_lat = fields.Float(required=False, allow_none=True)
+    north_east_lon = fields.Float(required=False, allow_none=True)
+    south_west_lat = fields.Float(required=False, allow_none=True)
+    south_west_lon = fields.Float(required=False, allow_none=True)
+    vehicle_types = fields.List(fields.Str(), required=False, allow_none=True)
+    provider_codes: fields.List(fields.Str(), required=False, allow_none=True)
+    battery_level_ranges: fields.List(fields.Str(), required=False, allow_none=True)
+    system_id = fields.Str(required=False, allow_none=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return TwoWheelsVehicleSearchFilters(**data)
+
+
+@dataclass
+class TwoWheelsSystemDTO:
+    id: str
+    geofence: dict
+
+
+@dataclass
+class TwoWheelsVehicleModelDTO:
+    id: int
+    actions: Optional[List[str]]
+    checkout_policy: Optional[dict]
+
+
+@dataclass
+class TwoWheelsConfigurationResponseDTO:
+    systems: Optional[List[TwoWheelsSystemDTO]]
+    vehicle_models: Optional[List[TwoWheelsVehicleModelDTO]]
+
+
+class TwoWheelsSystemDTOSchema(Schema):
+    id = fields.Str(required=True)
+    geofence = fields.Dict(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return TwoWheelsSystemDTO(**data)
+
+
+class TwoWheelsVehicleModelDTOSchema(Schema):
+    id = fields.Int(required=True)
+    actions = fields.List(fields.Str(), required=False, allow_none=True)
+    checkout_policy = fields.Dict(required=False, allow_none=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return TwoWheelsVehicleModelDTO(**data)
+
+
+class TwoWheelsConfigurationResponseDTOSchema(Schema):
+    systems = fields.List(fields.Nested(TwoWheelsSystemDTOSchema), required=False, allow_none=True)
+    vehicle_models = fields.List(fields.Nested(TwoWheelsVehicleModelDTOSchema), required=False, allow_none=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return TwoWheelsConfigurationResponseDTO(**data)
+
+
+@dataclass
+class TwoWheelsVehiclesDTO:
+    vehicles: Optional[List[TwoWheelsVehicleModelDTO]]
+
+
+class TwoWheelsVehiclesDTOSchema(Schema):
+    vehicles = fields.List(fields.Nested(TwoWheelsVehicleModelDTO), required=False, allow_none=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return TwoWheelsVehiclesDTO(**data)
