@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
+from uuid import UUID
 
 from marshmallow import Schema, fields, post_load
 
@@ -279,12 +280,90 @@ class TwoWheelsConfigurationResponseDTOSchema(Schema):
 
 
 @dataclass
+class TwoWheelsVehiclePricingDTO:
+    rate: float = None
+    start: int = None
+    end: int = None
+    interval: int = None
+
+
+class TwoWheelsVehiclePricingDTOSchema(Schema):
+    rate = fields.Float(required=False, allow_none=True)
+    start = fields.Int(required=False, allow_none=True)
+    end = fields.Int(required=False, allow_none=True)
+    interval = fields.Int(required=False, allow_none=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return TwoWheelsVehiclePricingDTO(**data)
+
+
+@dataclass
+class TwoWheelsVehicleDTO:
+    id: str = None
+    battery_level: int = None
+    battery_level_range: str = None
+    available_range: int = None
+    vehicle_type: str = None
+    provider_vehicle_type_id: str = None
+    propulsion: str = None
+    lat: float = None
+    lon: float = None
+    provider_logo_url: str = None
+    provider_name: str = None
+    provider_code: str = None
+    provider_id: UUID = None
+    verify_age: bool = None
+    verify_driving_license: bool = None
+    can_scan: bool = None
+    can_ring: bool = None
+    start_price: float = None
+    per_minute_pricing: List[TwoWheelsVehiclePricingDTO] = None
+    per_km_pricing: List[TwoWheelsVehiclePricingDTO] = None
+    pricing_plan_id: str = None
+    license_plate: str = None
+    system_id: str = None
+    model_id: str = None
+
+
+class TwoWheelsVehicleDTOSchema(Schema):
+    id = fields.Str(required=False, allow_none=True)
+    battery_level = fields.Int(required=False, allow_none=True)
+    battery_level_range = fields.Str(required=False, allow_none=True)
+    available_range = fields.Int(required=False, allow_none=True)
+    vehicle_type = fields.Str(required=False, allow_none=True)
+    provider_vehicle_type_id = fields.Str(required=False, allow_none=True)
+    propulsion = fields.Str(required=False, allow_none=True)
+    lat = fields.Float(required=False, allow_none=True)
+    lon = fields.Float(required=False, allow_none=True)
+    provider_logo_url = fields.Str(required=False, allow_none=True)
+    provider_name = fields.Str(required=False, allow_none=True)
+    provider_code = fields.Str(required=False, allow_none=True)
+    provider_id = fields.UUID(required=False, allow_none=True)
+    verify_age = fields.Bool(required=False, allow_none=True)
+    verify_driving_license = fields.Bool(required=False, allow_none=True)
+    can_scan = fields.Bool(required=False, allow_none=True)
+    can_ring = fields.Bool(required=False, allow_none=True)
+    start_price = fields.Float(required=False, allow_none=True)
+    per_minute_pricing = fields.List(fields.Nested(TwoWheelsVehiclePricingDTOSchema), required=False, allow_none=True)
+    per_km_pricing = fields.List(fields.Nested(TwoWheelsVehiclePricingDTOSchema), required=False, allow_none=True)
+    pricing_plan_id = fields.Str(required=False, allow_none=True)
+    license_plate = fields.Str(required=False, allow_none=True)
+    system_id = fields.Str(required=False, allow_none=True)
+    model_id = fields.Str(required=False, allow_none=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return TwoWheelsVehicleDTO(**data)
+
+
+@dataclass
 class TwoWheelsVehiclesDTO:
-    vehicles: Optional[List[TwoWheelsVehicleModelDTO]]
+    vehicles: Optional[List[TwoWheelsVehicleDTO]]
 
 
 class TwoWheelsVehiclesDTOSchema(Schema):
-    vehicles = fields.List(fields.Nested(TwoWheelsVehicleModelDTO), required=False, allow_none=True)
+    vehicles = fields.List(fields.Nested(TwoWheelsVehicleDTOSchema), required=False, allow_none=True)
 
     @post_load
     def make_instance(self, data, **kwargs):
