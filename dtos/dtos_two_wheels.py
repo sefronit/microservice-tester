@@ -233,12 +233,6 @@ class TwoWheelsVehicleSearchFiltersSchema(Schema):
 
 
 @dataclass
-class TwoWheelsSystemDTO:
-    id: str
-    geofence: dict
-
-
-@dataclass
 class TwoWheelsVehicleModelDTO:
     id: int
     actions: Optional[List[str]]
@@ -246,18 +240,73 @@ class TwoWheelsVehicleModelDTO:
 
 
 @dataclass
-class TwoWheelsConfigurationResponseDTO:
-    systems: Optional[List[TwoWheelsSystemDTO]]
-    vehicle_models: Optional[List[TwoWheelsVehicleModelDTO]]
+class PriceInfoDTO:
+    value: float
+    currency: str
+
+
+class PriceInfoDTOSchema(Schema):
+    value = fields.Float(required=True)
+    currency = fields.Str(required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return PriceInfoDTO(**data)
+
+
+@dataclass
+class VehicleChargeDTO:
+    riding: PriceInfoDTO
+    pausing: PriceInfoDTO
+    starting: PriceInfoDTO
+
+
+class VehicleChargeDTOSchema(Schema):
+    riding = fields.Nested(PriceInfoDTOSchema, required=True)
+    pausing = fields.Nested(PriceInfoDTOSchema, required=True)
+    starting = fields.Nested(PriceInfoDTOSchema, required=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return VehicleChargeDTO(**data)
+
+
+@dataclass
+class SubscriptionChargeDTO:
+    scooter: VehicleChargeDTO = None
+    bicycle: VehicleChargeDTO = None
+
+
+class SubscriptionChargeDTOSchema(Schema):
+    scooter = fields.Nested(VehicleChargeDTOSchema, required=False, allow_none=True)
+    bicycle = fields.Nested(VehicleChargeDTOSchema, required=False, allow_none=True)
+
+    @post_load
+    def make_instance(self, data, **kwargs):
+        return SubscriptionChargeDTO(**data)
+
+
+@dataclass
+class TwoWheelsSystemDTO:
+    id: str
+    geofence: dict
+    charges: SubscriptionChargeDTO
 
 
 class TwoWheelsSystemDTOSchema(Schema):
     id = fields.Str(required=True)
     geofence = fields.Dict(required=True)
+    charges = fields.Nested(SubscriptionChargeDTOSchema, required=False, allow_none=True)
 
     @post_load
     def make_instance(self, data, **kwargs):
         return TwoWheelsSystemDTO(**data)
+
+
+@dataclass
+class TwoWheelsConfigurationResponseDTO:
+    systems: Optional[List[TwoWheelsSystemDTO]]
+    vehicle_models: Optional[List[TwoWheelsVehicleModelDTO]]
 
 
 class TwoWheelsVehicleModelDTOSchema(Schema):
