@@ -124,13 +124,11 @@ class TwoWheelsErrorResponseSchema(Schema):
 
 @dataclass
 class TwoWheelsReservationRequestDTO:
-    user_id: str
     vehicle_id: int
     provider_code: str
 
 
 class TwoWheelsReservationRequestDTOSchema(Schema):
-    user_id = fields.Str(required=True, allow_none=True)
     vehicle_id = fields.Int(required=True)
     provider_code = fields.Str(required=True, allow_none=True)
 
@@ -367,6 +365,8 @@ class TwoWheelsVehicleDTO:
     can_scan: bool = None
     can_ring: bool = None
     start_price: float = None
+    ride_price: float = None
+    pause_price: float = None
     per_minute_pricing: List[TwoWheelsVehiclePricingDTO] = None
     per_km_pricing: List[TwoWheelsVehiclePricingDTO] = None
     pricing_plan_id: str = None
@@ -394,6 +394,8 @@ class TwoWheelsVehicleDTOSchema(Schema):
     can_scan = fields.Bool(required=False, allow_none=True)
     can_ring = fields.Bool(required=False, allow_none=True)
     start_price = fields.Float(required=False, allow_none=True)
+    ride_price = fields.Float(required=False, allow_none=True)
+    pause_price = fields.Float(required=False, allow_none=True)
     per_minute_pricing = fields.List(fields.Nested(TwoWheelsVehiclePricingDTOSchema), required=False, allow_none=True)
     per_km_pricing = fields.List(fields.Nested(TwoWheelsVehiclePricingDTOSchema), required=False, allow_none=True)
     pricing_plan_id = fields.Str(required=False, allow_none=True)
