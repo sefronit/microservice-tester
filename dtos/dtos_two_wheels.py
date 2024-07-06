@@ -139,12 +139,10 @@ class TwoWheelsReservationRequestDTOSchema(Schema):
 
 @dataclass
 class TwoWheelsReservationCancellationRequestDTO:
-    user_id: str
     provider_code: str
 
 
 class TwoWheelsReservationCancellationRequestDTOSchema(Schema):
-    user_id = fields.Str(required=True, allow_none=True)
     provider_code = fields.Str(required=True, allow_none=True)
 
     @post_load
